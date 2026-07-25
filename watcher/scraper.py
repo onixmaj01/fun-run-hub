@@ -43,7 +43,19 @@ def run_fun_run_watcher():
             # Utilize metadata tags for dynamic naming
             filename = f"{platform}_{name}_proof.png"
             page.screenshot(path=filename)
-            print(f"✅ Visual proof captured: {filename}")
+            print(f"✅ Visual proof captured locally: {filename}")
+
+            # 5. Push Binary to Supabase Storage Bucket ('proofs')
+            try:
+                with open(filename, "rb") as f:
+                    supabase.storage.from_("proofs").upload(
+                        path=filename,
+                        file=f,
+                        file_options={"content-type": "image/png", "upsert": "true"}
+                    )
+                print(f"☁️ Visual proof successfully uploaded to Supabase Storage: {filename}")
+            except Exception as upload_error:
+                print(f"⚠️ Storage upload warning: {upload_error}")
 
         browser.close()
         print("🏁 All target runs processed successfully.")
